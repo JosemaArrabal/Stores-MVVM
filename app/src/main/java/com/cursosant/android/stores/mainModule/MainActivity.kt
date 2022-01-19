@@ -60,14 +60,14 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
         }
     }
 
-    private fun getStores(){
+    /*private fun getStores(){
         doAsync {
             val stores = StoreApplication.database.storeDao().getAllStores()
             uiThread {
                 mAdapter.setStores(stores)
             }
         }
-    }
+    }*/
 
     /*
     * OnClickListener
