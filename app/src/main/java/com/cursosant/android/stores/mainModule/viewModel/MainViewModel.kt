@@ -12,13 +12,18 @@ import org.jetbrains.anko.uiThread
 class MainViewModel : ViewModel() {
 
     // Esta propiedad sirve para reflejar los datos de la vista
-    private var stores: MutableLiveData<List<StoreEntity>>
     private var interactor: MainInteractor
 
     init {
         interactor = MainInteractor()
-        stores = MutableLiveData()
-        loadStores()
+    }
+
+    private val stores: MutableLiveData<List<StoreEntity>> by lazy {
+
+        // also es una variable de alcance que significa y además de
+        MutableLiveData<List<StoreEntity>>().also {
+            loadStores()
+        }
     }
 
     fun getStores(): LiveData<List<StoreEntity>> {
