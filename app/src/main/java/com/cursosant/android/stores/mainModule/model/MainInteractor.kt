@@ -19,4 +19,14 @@ class MainInteractor {
             }
         }
     }
+
+    // Función de orden superior-> Método definitivo
+    fun getStores(callback: (MutableList<StoreEntity>) -> Unit) {
+        doAsync {
+            val storeList = StoreApplication.database.storeDao().getAllStores()
+            uiThread {
+                callback(storeList)
+            }
+        }
+    }
 }
