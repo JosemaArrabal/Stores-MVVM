@@ -13,9 +13,11 @@ class MainViewModel : ViewModel() {
 
     // Esta propiedad sirve para reflejar los datos de la vista
     private var interactor: MainInteractor
+    private var storeList: MutableList<StoreEntity>
 
     init {
         interactor = MainInteractor()
+        storeList = mutableListOf()
     }
 
     private val stores: MutableLiveData<List<StoreEntity>> by lazy {
@@ -31,14 +33,30 @@ class MainViewModel : ViewModel() {
     }
 
     private fun loadStores() {
-        /*interactor.getStoresCallback(object : MainInteractor.StoresCallback {
-            override fun getStoresCallback(stores: MutableList<StoreEntity>) {
-                this@MainViewModel.stores.value = stores
-
-            }
-        })*/
         interactor.getStores {
             stores.value = it
         }
+    }
+
+    fun deleteStore(storeEntity: StoreEntity) {
+        interactor.deleteStore(storeEntity, {
+            val index = storeList.indexOf(storeEntity)
+            if (index != -1) {
+                storeList.removeAt(index)
+                stores.value = storeList
+            }
+
+        })
+    }
+
+    fun updateStore(storeEntity: StoreEntity) {
+        interactor.updateStore(storeEntity, {
+            val index = storeList.indexOf(storeEntity)
+            if (index != -1) {
+                storeList.set(index, storeEntity)
+                stores.value = storeList
+            }
+
+        })
     }
 }
