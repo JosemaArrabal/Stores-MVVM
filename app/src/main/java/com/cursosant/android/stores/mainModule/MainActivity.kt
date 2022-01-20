@@ -12,6 +12,7 @@ import com.cursosant.android.stores.common.utils.MainAux
 import com.cursosant.android.stores.common.entities.StoreEntity
 import com.cursosant.android.stores.databinding.ActivityMainBinding
 import com.cursosant.android.stores.editModule.EditStoreFragment
+import com.cursosant.android.stores.editModule.viewModel.EditStoreViewModel
 import com.cursosant.android.stores.mainModule.adapter.OnClickListener
 import com.cursosant.android.stores.mainModule.adapter.StoreAdapter
 import com.cursosant.android.stores.mainModule.viewModel.MainViewModel
@@ -19,7 +20,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 
-class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
+class MainActivity : AppCompatActivity(), OnClickListener {
 
     private lateinit var mBinding: ActivityMainBinding
 
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
 
     // MVVM
     private lateinit var mMainViewModel: MainViewModel
+    private lateinit var mEditStoreViewModel: EditStoreViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,11 +51,18 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
         mMainViewModel.getStores().observe(this, { stores ->
             mAdapter.setStores(stores)
         })
+
+        mEditStoreViewModel = ViewModelProvider(this).get(EditStoreViewModel::class.java)
+        mEditStoreViewModel.getShowFab().observe(this, { isVisible ->
+            if (isVisible) mBinding.fab.show() else mBinding.fab.hide()
+        })
     }
 
-    private fun launchEditFragment(args: Bundle? = null) {
+    private fun launchEditFragment(storeEntity: StoreEntity= StoreEntity()) {
+        mEditStoreViewModel.setShoyFab(false)
+        mEditStoreViewModel.setStoreSelected(storeEntity)
+
         val fragment = EditStoreFragment()
-        if (args != null) fragment.arguments = args
 
         val fragmentManager = supportFragmentManager
         val fragmentTransaction = fragmentManager.beginTransaction()
@@ -61,8 +70,6 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
         fragmentTransaction.add(R.id.containerMain, fragment)
         fragmentTransaction.addToBackStack(null)
         fragmentTransaction.commit()
-
-        hideFab()
     }
 
     private fun setupRecylcerView() {
@@ -80,11 +87,8 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
     /*
     * OnClickListener
     * */
-    override fun onClick(storeId: Long) {
-        val args = Bundle()
-        args.putLong(getString(R.string.arg_id), storeId)
-
-        launchEditFragment(args)
+    override fun onClick(storeEntity: StoreEntity) {
+        launchEditFragment(storeEntity)
     }
 
     override fun onFavoriteStore(storeEntity: StoreEntity) {
@@ -145,20 +149,5 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
             startActivity(intent)
         else
             Toast.makeText(this, R.string.main_error_no_resolve, Toast.LENGTH_LONG).show()
-    }
-
-    /*
-    * MainAux
-    * */
-    override fun hideFab(isVisible: Boolean) {
-        if (isVisible) mBinding.fab.show() else mBinding.fab.hide()
-    }
-
-    override fun addStore(storeEntity: StoreEntity) {
-        mAdapter.add(storeEntity)
-    }
-
-    override fun updateStore(storeEntity: StoreEntity) {
-        mAdapter.update(storeEntity)
     }
 }
